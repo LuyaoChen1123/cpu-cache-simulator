@@ -153,11 +153,43 @@ while (command != "quit"):
 
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
             print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
+        
+        elif command == "testfile" and len(params) == 1:
+            # Our custom stuff here
+            with open(params[0]) as f:
+                content = f.readlines()
+            content = [x.strip().split(" ") for x in content]
+            for line in content:
+                cmd = line[0]
+                addr = int(line[1])
+                size = int(line[2])
+                if cmd == "READ":
+                    byte = read(addr, memory, cache)
+                    # print("\nByte 0x" + util.hex_str(byte, 2) + " read from " +
+                    #     util.bin_str(addr, args.MEMORY) + "\n")
+                elif cmd == "WRITE":
+                    byte = int(line[3])
+                    write(addr, byte, memory, cache)
+                    # print("\nByte 0x" + util.hex_str(byte, 2) + " written to " +
+                    #     util.bin_str(addr, args.MEMORY) + "\n")
+                else:
+                    # Unrecognized command; silently fail
+                    continue
+
+            ratio = (hits / ((hits + misses) if misses else 1)) * 100
+            print("\nHits: {0} | Misses: {1}".format(hits, misses))
+            print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
+
 
         elif command != "quit":
             print("\nERROR: invalid command\n")
 
     except IndexError:
         print("\nERROR: out of bounds\n")
-    except:
-        print("\nERROR: incorrect syntax\n")
+    except Exception as e:
+        print("\nERROR: ", e)
+
+# Step 1: Open file & parse line by line (x)
+# Step 2: Test program to see what addresses should look like
+# Step 3: Write sample file (x)
+# Step 4: Add missing code & w/sample file
