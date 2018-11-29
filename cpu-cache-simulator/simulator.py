@@ -154,15 +154,19 @@ while (command != "quit"):
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
             print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
         
-        elif command == "testfile" and len(params) == 1:
-            # Our custom stuff here
+        elif command == "ptd" and len(params) == 2:
+            # PTD = prepare training data
+            # Param 0 = file name
+            # Param 1 = look-ahead window
             with open(params[0]) as f:
                 content = f.readlines()
             content = [x.strip().split(" ") for x in content]
-            for line in content:
+            for i in range(len(content)):
+                line = content[i]
                 cmd = line[0]
                 addr = int(line[1])
                 size = int(line[2])
+                # First do operation
                 if cmd == "READ":
                     byte = read(addr, memory, cache)
                     # print("\nByte 0x" + util.hex_str(byte, 2) + " read from " +
@@ -175,6 +179,23 @@ while (command != "quit"):
                 else:
                     # Unrecognized command; silently fail
                     continue
+                # Then calculate miss rate at this moment
+                missRate = (misses / ((hits + misses) if misses else 1))
+                # Calculate label (reused = 1, not reused = 0) with lookahead window given as parameter
+                reused = 0
+                endSearch = min(len(content) - 1, int(params[1]))
+                for j in range(i, endSearch):
+                    addr2 = int(content[j][1])
+                    if addr == addr2:
+                        reused = 1
+                        break
+                line.append(str(missRate))
+                line.append(str(reused))
+                # Now write to new file
+                with open("res.txt", "w") as f:
+                    for line in content:
+                        if len(line) == 6:
+                            f.write(" ".join(line) + "\n")
 
             ratio = (hits / ((hits + misses) if misses else 1)) * 100
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
