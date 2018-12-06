@@ -79,6 +79,30 @@ mapping = 2 ** args.MAPPING
 hits = 0
 misses = 0
 
+global global_counter
+global_counter = 1
+global global_dict
+global_dict = {}
+
+def getAddr(line):
+    global global_counter
+    global global_dict
+    tmp = []
+    for item in line:
+        if item != " " and item != "<":
+            tmp.append(item)
+    if len(tmp) == 0:
+        return -1
+    addrStr = tmp[0]
+    addr = 0
+    if addrStr in global_dict.keys():
+        return global_dict[addrStr]
+    else:
+        global_dict[addrStr] = global_counter
+        addr = global_counter
+        global_counter += 1
+        return addr
+
 memory = Memory(mem_size, block_size)
 cache = Cache(cache_size, mem_size, block_size,
               mapping, args.REPLACE, args.WRITE)
@@ -163,39 +187,54 @@ while (command != "quit"):
             content = [x.strip().split(" ") for x in content]
             for i in range(len(content)):
                 line = content[i]
-                cmd = line[0]
-                addr = int(line[1])
-                size = int(line[2])
-                # First do operation
-                if cmd == "READ":
-                    byte = read(addr, memory, cache)
-                    # print("\nByte 0x" + util.hex_str(byte, 2) + " read from " +
-                    #     util.bin_str(addr, args.MEMORY) + "\n")
-                elif cmd == "WRITE":
-                    byte = int(line[3])
-                    write(addr, byte, memory, cache)
-                    # print("\nByte 0x" + util.hex_str(byte, 2) + " written to " +
-                    #     util.bin_str(addr, args.MEMORY) + "\n")
-                else:
-                    # Unrecognized command; silently fail
+                if line[0] != "<":
                     continue
+                addr = getAddr(line)
+                if addr == -1:
+                    continue
+                # print("ADDR: ", addr)
+                # First do operation; assume reads as we don't differentiate between reads & writes
+                byte = read(addr, memory, cache)
+                # print("\nByte 0x" + util.hex_str(byte, 2) + " read from " +
+                #     util.bin_str(addr, args.MEMORY) + "\n")
                 # Then calculate miss rate at this moment
                 missRate = (misses / ((hits + misses) if misses else 1))
-                # Calculate label (reused = 1, not reused = 0) with lookahead window given as parameter
+                
+                # Reuse count & distance are also features
+                pastReuseCount = 0
+                pastReuseDistance = 0
+                for j in range(i-1, -1, -1):
+                    addr2 = getAddr(content[j])
+                    if addr2 == -1:
+                        continue
+                    if addr == addr2:
+                        pastReuseCount += 1
+                        if pastReuseDistance == 0:
+                            pastReuseDistance = i - j
+
+                # Calculate FUTURE REUSE label (reused = 1, not reused = 0) with lookahead window given as parameter
                 reused = 0
                 endSearch = min(len(content) - 1, int(params[1]))
                 for j in range(i, endSearch):
-                    addr2 = int(content[j][1])
+                    addr2 = getAddr(content[j])
+                    if addr2 == -1:
+                        continue
+                    # print("ADDR2: ", addr2)
                     if addr == addr2:
                         reused = 1
                         break
+                
                 line.append(str(missRate))
+                line.append(str(pastReuseCount))
+                line.append(str(pastReuseDistance))
                 line.append(str(reused))
                 # Now write to new file
-                with open("res.txt", "w") as f:
-                    for line in content:
-                        if len(line) == 6:
-                            f.write(" ".join(line) + "\n")
+                print("LINE: ", line)
+            with open("res.txt", "w") as f:
+                for line in content:
+                    if len(line) == 6:
+                        line.pop(0)
+                        f.write(" ".join(line) + "\n")
 
             ratio = (hits / ((hits + misses) if misses else 1)) * 100
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
