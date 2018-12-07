@@ -234,6 +234,7 @@ while (command != "quit"):
                 for line in content:
                     if len(line) == 6:
                         line.pop(0)
+                        line[0] = line[0].strip()
                         f.write(" ".join(line) + "\n")
 
             ratio = (hits / ((hits + misses) if misses else 1)) * 100
