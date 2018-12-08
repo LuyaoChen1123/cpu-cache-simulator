@@ -42,7 +42,7 @@ def main(file):
 	# dimensions of the nn
 	n_in, n_h1, n_h2, n_out = n - 1, 100, 100, 1
 	# condition of converge
-	thres = 0.001
+	thres = 0.0005
 	model = nn.Sequential(nn.Linear(n_in, n_h1),
 		nn.Tanh(),
 		nn.Linear(n_h1, n_h2),
@@ -59,24 +59,22 @@ def main(file):
 	# train the model on training data
 
 	data = parse_data(file)
-	# print(data.shape)
 	shuffle(data)
-	# business_id, useful, review_count, bag_of_words
+	# address, miss rate, past reuse count, past reuse distance, reused(label)
 	label = torch.from_numpy(data[:,n-1].reshape(-1,1)).float()
 	features = torch.from_numpy(data[:, 0:n-1]).float()
 	print(label.shape)
 	print(features.shape)
-	for epoch in range(100):
+	for epoch in range(10000):
 		y_pred = model(features)
 
 		loss = criterion(y_pred, label)
 		if(epoch % 100 == 0):
 			print('epoch: ', epoch,' loss: ', loss.item())
 			# converges, break
-		
-		if abs(prev_loss - loss.item()) <= thres:
-			break
-		prev_loss = loss.item()
+			if abs(prev_loss - loss.item()) <= thres:
+				break
+			prev_loss = loss.item()
 
 		optimizer.zero_grad()
 		loss.backward()
@@ -90,7 +88,7 @@ def main(file):
 		else:
 			reuse.append(1)
 
-	print(sum(reuse == data[:,n-1]))
+	print('The ratio of correctly predicted reuse: ' + str(sum(reuse == data[:,n-1]) / m))
 
 
 if __name__ == "__main__":
