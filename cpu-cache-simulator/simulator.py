@@ -177,7 +177,7 @@ while (command != "quit"):
 
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
             print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
-        
+
         elif command == "ptd" and len(params) == 2:
             # PTD = prepare training data
             # Param 0 = file name
@@ -186,57 +186,64 @@ while (command != "quit"):
                 content = f.readlines()
             content = [x.strip().split(" ") for x in content]
             for i in range(len(content)):
-                line = content[i]
-                if line[0] != "<":
-                    continue
-                addr = getAddr(line)
-                if addr == -1:
-                    continue
-                # print("ADDR: ", addr)
-                # First do operation; assume reads as we don't differentiate between reads & writes
-                byte = read(addr, memory, cache)
-                # print("\nByte 0x" + util.hex_str(byte, 2) + " read from " +
-                #     util.bin_str(addr, args.MEMORY) + "\n")
-                # Then calculate miss rate at this moment
-                missRate = (misses / ((hits + misses) if misses else 1))
-                
-                # Reuse count & distance are also features
-                pastReuseCount = 0
-                pastReuseDistance = 0
-                for j in range(i-1, -1, -1):
-                    addr2 = getAddr(content[j])
-                    if addr2 == -1:
+                try:
+                    line = content[i]
+                    if line[0] != "<":
                         continue
-                    if addr == addr2:
-                        pastReuseCount += 1
-                        if pastReuseDistance == 0:
-                            pastReuseDistance = i - j
-
-                # Calculate FUTURE REUSE label (reused = 1, not reused = 0) with lookahead window given as parameter
-                reused = 0
-                endSearch = min(len(content) - 1, int(params[1]))
-                for j in range(i, endSearch):
-                    addr2 = getAddr(content[j])
-                    if addr2 == -1:
+                    addr = getAddr(line)
+                    if addr == -1:
                         continue
-                    # print("ADDR2: ", addr2)
-                    if addr == addr2:
-                        reused = 1
-                        break
-                
-                line.append(str(missRate))
-                line.append(str(pastReuseCount))
-                line.append(str(pastReuseDistance))
-                line.append(str(reused))
-                # Now write to new file
-                print("LINE: ", line)
-            with open("res.txt", "w") as f:
-                for line in content:
-                    if len(line) == 6:
-                        line.pop(0)
-                        line[0] = line[0].strip()
-                        f.write(" ".join(line) + "\n")
+                    # print("ADDR: ", addr)
+                    # First do operation; assume reads as we don't differentiate between reads & writes
+                    byte = read(addr, memory, cache)
+                    # print("\nByte 0x" + util.hex_str(byte, 2) + " read from " +
+                    #     util.bin_str(addr, args.MEMORY) + "\n")
+                    # Then calculate miss rate at this moment
+                    missRate = (misses / ((hits + misses) if misses else 1))
 
+                    # Reuse count & distance are also features
+                    pastReuseCount = 0
+                    pastReuseDistance = 0
+                    for j in range(i-1, -1, -1):
+                        addr2 = getAddr(content[j])
+                        if addr2 == -1:
+                            continue
+                        if addr == addr2:
+                            pastReuseCount += 1
+                            if pastReuseDistance == 0:
+                                pastReuseDistance = i - j
+
+                    # Calculate FUTURE REUSE label (reused = 1, not reused = 0) with lookahead window given as parameter
+                    reused = 0
+                    endSearch = min(len(content) - 1, int(params[1]))
+                    for j in range(min(i, endSearch), endSearch):
+                        addr2 = getAddr(content[j])
+                        if addr2 == -1:
+                            continue
+                        # print("ADDR2: ", addr2)
+                        if addr == addr2:
+                            reused = 1
+                            break
+
+                    line.append(str(missRate))
+                    line.append(str(pastReuseCount))
+                    line.append(str(pastReuseDistance))
+                    line.append(str(reused))
+                    # Now write to new file
+                    # print("LINE: ", line)
+                except:
+                    continue
+                with open("res.txt", "w") as f:
+                    for line in content:
+                        try:
+                            if len(line) == 6:
+                                line.pop(0)
+                                line[0] = line[0].strip()
+                                f.write(" ".join(line) + "\n")
+                        except:
+                            continue
+
+            print("DONE WRITING")
             ratio = (hits / ((hits + misses) if misses else 1)) * 100
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
             print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
