@@ -204,7 +204,7 @@ while (command != "quit"):
                     # Reuse count & distance are also features
                     pastReuseCount = 0
                     pastReuseDistance = 0
-                    for j in range(i-1, -1, -1):
+                    for j in range(i-1, max(i-int(params[1]), -1), -1):
                         addr2 = getAddr(content[j])
                         if addr2 == -1:
                             continue
