@@ -226,7 +226,7 @@ while (command != "quit"):
 
                     # Calculate FUTURE REUSE label (reused = 1, not reused = 0) with lookahead window given as parameter
                     reused = 0
-                    endSearch = min(len(content) - 1, int(params[1]))
+                    endSearch = min(len(content) - 1, i + int(params[1]))
                     for j in range(min(i, endSearch), endSearch):
                         addr2 = getAddr(content[j])
                         if addr2 == -1:
