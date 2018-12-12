@@ -83,6 +83,10 @@ global global_counter
 global_counter = 1
 global global_dict
 global_dict = {}
+global addr_reuse
+addr_reuse = {}
+global addr_lastUsage
+addr_lastUsage = {}
 
 def getAddr(line):
     global global_counter
@@ -202,16 +206,23 @@ while (command != "quit"):
                     missRate = (misses / ((hits + misses) if misses else 1))
 
                     # Reuse count & distance are also features
-                    pastReuseCount = 0
-                    pastReuseDistance = 0
-                    for j in range(i-1, max(i-int(params[1]), -1), -1):
-                        addr2 = getAddr(content[j])
-                        if addr2 == -1:
-                            continue
-                        if addr == addr2:
-                            pastReuseCount += 1
-                            if pastReuseDistance == 0:
-                                pastReuseDistance = i - j
+                    # pastReuseCount = 0
+                    # pastReuseDistance = 0
+                    # for j in range(i-1, max(i-int(params[1]), -1), -1):
+                    #     addr2 = getAddr(content[j])
+                    #     if addr2 == -1:
+                    #         continue
+                    #     if addr == addr2:
+                    #         pastReuseCount += 1
+                    #         if pastReuseDistance == 0:
+                    #             pastReuseDistance = i - j
+
+                    pastReuse = addr_lastUsage.get(addr, i)
+                    addr_lastUsage[addr] = i
+                    pastReuseDistance = i - pastReuse
+
+                    pastReuseCount = addr_reuse.get(addr, 0)
+                    addr_reuse[addr] = pastReuseCount + 1
 
                     # Calculate FUTURE REUSE label (reused = 1, not reused = 0) with lookahead window given as parameter
                     reused = 0
@@ -239,6 +250,7 @@ while (command != "quit"):
                             if len(line) == 6:
                                 line.pop(0)
                                 line[0] = line[0].strip()
+                                # print(" ".join(line) + "\n")
                                 f.write(" ".join(line) + "\n")
                         except:
                             continue

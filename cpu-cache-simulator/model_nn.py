@@ -6,6 +6,7 @@ import sys
 import os 
 from sklearn.utils import shuffle
 from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
 from scipy import sparse
 
 
@@ -33,14 +34,16 @@ def parse_data(file):
 	feat = np.array(feat)
 	return np.concatenate((addr_oneHot, feat), axis=1)
 
-
-def main(file):
-	data = parse_data(file)
-
+def train_model(data):
 	m, n = data.shape
+	# address, miss rate, past reuse count, past reuse distance, reused(label)
+	label = torch.from_numpy(data[:,n-1].reshape(-1,1)).float()
+	features = torch.from_numpy(data[:, 0:n-1]).float()
+	print(label.shape)
+	print(features.shape)
 
 	# dimensions of the nn
-	n_in, n_h1, n_h2, n_out = n - 1, 100, 100, 1
+	n_in, n_h1, n_h2, n_out = n - 1, 300, 300, 1
 	# condition of converge
 	thres = 0.0005
 	model = nn.Sequential(nn.Linear(n_in, n_h1),
@@ -51,20 +54,13 @@ def main(file):
 		nn.Sigmoid()
 		)
 
+	# BCE is cross-entropy loss
 	criterion = torch.nn.BCELoss()
 	optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
 	prev_loss = 0
 
 	# train the model on training data
-
-	data = parse_data(file)
-	shuffle(data)
-	# address, miss rate, past reuse count, past reuse distance, reused(label)
-	label = torch.from_numpy(data[:,n-1].reshape(-1,1)).float()
-	features = torch.from_numpy(data[:, 0:n-1]).float()
-	print(label.shape)
-	print(features.shape)
 	for epoch in range(10000):
 		y_pred = model(features)
 
@@ -72,15 +68,33 @@ def main(file):
 		if(epoch % 100 == 0):
 			print('epoch: ', epoch,' loss: ', loss.item())
 			# converges, break
-			if abs(prev_loss - loss.item()) <= thres:
-				break
+			# if abs(prev_loss - loss.item()) <= thres:
+			# 	break
 			prev_loss = loss.item()
 
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
 
-	pred = model(features).detach().numpy().reshape(-1,1)
+	return model, features, label
+
+
+def main(file):
+	data = parse_data(file)
+	train, test = train_test_split(data, test_size=0.7, random_state=42)
+	data = np.concatenate((train, test), axis=0)
+	m, n = data.shape
+	print(data.shape)
+	print(train.shape)
+	print(test.shape)
+
+	model, feat_train, label_train = train_model(train)
+	feat_test = torch.from_numpy(test[:, 0:n-1]).float()
+
+	pred_train = model(feat_train).detach().numpy().reshape(-1,1)
+	pred_test = model(feat_test).detach().numpy().reshape(-1,1)
+
+	pred = np.concatenate((pred_train, pred_test), axis=0)
 	reuse = []
 	for i in pred:
 		if i < 0.5:
@@ -89,6 +103,10 @@ def main(file):
 			reuse.append(1)
 
 	print('The ratio of correctly predicted reuse: ' + str(sum(reuse == data[:,n-1]) / m))
+	print('Ratio on train: ' + str(sum(reuse[0:train.shape[0]] == train[:,n-1]) / train.shape[0]))
+	print('Ratio on test: ' + str(sum(reuse[train.shape[0]:] == test[:,n-1]) / test.shape[0]))
+
+
 
 
 if __name__ == "__main__":
