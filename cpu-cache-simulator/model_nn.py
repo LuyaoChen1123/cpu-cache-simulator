@@ -106,7 +106,7 @@ def main(file):
 			reuse.append(1)
 			result.append('< ' + addr[i])
 
-	with open("pred.txt", "w") as f:
+	with open("pred_nn.txt", "w") as f:
 		for line in result:
 			f.write(line + "\n")
 
