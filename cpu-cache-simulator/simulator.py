@@ -242,18 +242,18 @@ while (command != "quit"):
                     line.append(str(reused))
                     # Now write to new file
                     # print("LINE: ", line)
-                except:
-                    continue
-                with open("res.txt", "w") as f:
-                    for line in content:
-                        try:
-                            if len(line) == 6:
-                                line.pop(0)
-                                line[0] = line[0].strip()
-                                # print(" ".join(line) + "\n")
-                                f.write(" ".join(line) + "\n")
-                        except:
-                            continue
+                except Exception as e:
+                    print("\nERROR: ", e)
+            with open("res.txt", "w") as f:
+                for line in content:
+                    try:
+                        if len(line) == 6:
+                            line.pop(0)
+                            line[0] = line[0].strip()
+                            # print(" ".join(line) + "\n")
+                            f.write(" ".join(line) + "\n")
+                    except Exception as e:
+                        print("\nERROR: ", e)
 
             print("DONE WRITING")
             ratio = (hits / ((hits + misses) if misses else 1)) * 100
