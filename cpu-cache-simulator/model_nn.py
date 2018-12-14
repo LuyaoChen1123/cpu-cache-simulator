@@ -62,7 +62,7 @@ def train_model(data):
 	prev_loss = 0
 
 	# train the model on training data
-	for epoch in range(1000):
+	for epoch in range(1500):
 		y_pred = model(features)
 
 		loss = criterion(y_pred, label)
@@ -81,11 +81,20 @@ def train_model(data):
 
 
 def main(file):
-	data, addr = parse_data(file)
-	train, test = train_test_split(data, test_size=0.7, random_state=42)
+	# data, addr = parse_data(file)
+	# train, test = train_test_split(data, test_size=0.7, random_state=42)
 	# data = np.concatenate((train, test), axis=0)
-	m, n = data.shape
-	print(data.shape)
+	train = np.load(file+"_train.npy")
+	test = np.load(file+"_test.npy")
+	train_addr = np.load(file+"_train_addr.npy")
+	test_addr = np.load(file+"_test_addr.npy")
+
+	indices = np.arange(train.shape[0])
+	np.random.shuffle(indices)
+	train = train[indices]
+
+	m, n = test.shape
+	# print(data.shape)
 	print(train.shape)
 	print(test.shape)
 
@@ -93,25 +102,27 @@ def main(file):
 	feat_test = torch.from_numpy(test[:, 0:n-1]).float()
 
 	# pred_train = model(feat_train).detach().numpy().ravel()
-	# pred_test = model(feat_test).detach().numpy().reshape(-1,1)
+	pred_test = model(feat_test).detach().numpy().reshape(-1,1)
 
-	pred = model(torch.from_numpy(data[:, 0:n-1]).float()).detach().numpy().reshape(-1,1)
+	# pred = model(torch.from_numpy(data[:, 0:n-1]).float()).detach().numpy().reshape(-1,1)
 	
 	reuse = []
 	result = []
-	for i in range(len(pred)):
-		if pred[i] < 0.5:
+	for i in range(len(pred_test)):
+		if pred_test[i] < 0.5:
 			reuse.append(0)
 		else:
 			reuse.append(1)
-			result.append('< ' + addr[i])
+			result.append('< ' + test_addr[i]+'\n')
 
 	with open("pred_nn.txt", "w") as f:
+		for line in train_addr:
+			f.write('<' + line+'\n')
 		for line in result:
-			f.write(line + "\n")
+			f.write(line)
 
 	# print(reuse)
-	print('The ratio of correctly predicted reuse: ' + str(sum(reuse == data[:,n-1]) / m))
+	print('The ratio of correctly predicted reuse: ' + str(sum(reuse == test[:,n-1]) / m))
 	# print('Ratio on train: ' + str(sum(pred_train == train[:,n-1]) / train.shape[0]))
 	# print('Ratio on test: ' + str(sum(pred_test == test[:,n-1]) / test.shape[0]))
 
