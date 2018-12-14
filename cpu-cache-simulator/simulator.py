@@ -207,7 +207,7 @@ while (command != "quit"):
 
                     if line[0] != "<" and line[0] != ">":
                         continue
-                    addr = getAddr(line[1])
+                    addr = getAddr(line)
                     # print("ADDR: ", addr)
                     if addr == -1:
                         continue
