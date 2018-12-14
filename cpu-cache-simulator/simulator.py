@@ -269,7 +269,7 @@ while (command != "quit"):
             ratio = (hits / ((hits + misses) if misses else 1)) * 100
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
             print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
-
+            break
 
         elif command != "quit":
             print("\nERROR: invalid command\n")

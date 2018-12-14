@@ -117,7 +117,7 @@ def main(file):
 
 	with open("pred_nn.txt", "w") as f:
 		for line in train_addr:
-			f.write('<' + line+'\n')
+			f.write('< ' + line+'\n')
 		for line in result:
 			f.write(line)
 
