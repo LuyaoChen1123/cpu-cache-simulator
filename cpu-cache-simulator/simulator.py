@@ -93,7 +93,7 @@ def getAddr(line):
     global global_dict
     tmp = []
     for item in line:
-        if item != " " and item != "<":
+        if item != " " and item != "<" and item != ">":
             tmp.append(item)
     if len(tmp) == 0:
         return -1
@@ -195,7 +195,7 @@ while (command != "quit"):
             for i in range(len(content)):
                 try:
                     line = content[i]
-                    if line[0] != "<":
+                    if line[0] != "<" and line[0] != ">":
                         continue
                     addr = getAddr(line)
                     if addr == -1:
