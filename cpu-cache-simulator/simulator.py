@@ -188,9 +188,9 @@ while (command != "quit"):
             # Param 1 = look-ahead window
             content = []
             if(len(params) == 2):
-                content = f.readlines()
+                with open(params[0]) as f:
+                    content = f.readlines()
                 content = [x.strip().split(" ") for x in content]
-
 
             if(len(params) == 3):
                 with open(params[0]) as f:
