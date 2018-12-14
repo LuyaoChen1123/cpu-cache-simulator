@@ -88,7 +88,11 @@ def main(filename):
 ############ Linear SVM Classifier ###############
 	maxC = tuning(X_train, y_train)
 	print("Using c =", maxC)
-	svmClassifier = svm.LinearSVC(C=maxC, dual=False)
+	count_r = np.sum(y_train)
+	count_n = len(y_train) - count_r
+	ratio = 1.0*count_r/count_n
+	print(ratio)
+	svmClassifier = svm.LinearSVC(C=maxC, dual=False, class_weight = {1:ratio, 0:1})
 	svmClassifier.fit(X_train, y_train)
 
 	predict = svmClassifier.predict(X_test)
@@ -113,7 +117,7 @@ def main(filename):
 
 
 ############# Random Forest Classifier ###############
-	randomForestClassifier = RandomForestClassifier(n_estimators=50)
+	randomForestClassifier = RandomForestClassifier(n_estimators=50, class_weight = {1:ratio, 0:1})
 	randomForestClassifier.fit(X_train, y_train)
 	
 	predict = randomForestClassifier.predict(X_test)
