@@ -202,9 +202,12 @@ while (command != "quit"):
             for i in range(len(content)):
                 try:
                     line = content[i]
+                    if(len(line) != 2):
+                        continue
+
                     if line[0] != "<" and line[0] != ">":
                         continue
-                    addr = getAddr(line)
+                    addr = getAddr(line[1])
                     # print("ADDR: ", addr)
                     if addr == -1:
                         continue
