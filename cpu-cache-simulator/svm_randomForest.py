@@ -55,14 +55,14 @@ def main(filename):
 	X_train, X_test, y_train, y_test = train_test_split(features, label, 
 		test_size=0.7)
 
+
+
+############# Linear SVM Classifier ###############
 	maxC = tuning(X_train, y_train)
 	print("Using c =", maxC)
 	svmClassifier = svm.LinearSVC(C=maxC, dual=False)
 	svmClassifier.fit(X_train, y_train)
 
-	randomForestClassifier = RandomForestClassifier(n_estimators=50)
-	randomForestClassifier.fit(X_train, y_train)
-	
 	predict = svmClassifier.predict(X_test)
 	# print(predict.shape)
 	print("Accuracy on test set for SVM", accuracy_score(predict, y_test))
@@ -74,9 +74,16 @@ def main(filename):
 			if predict[i] == 1:
 				f.write("< " + addresses[i] + "\n")
 
-	# predict = randomForestClassifier.predict(X_test)
-	# # print(predict.shape)
-	# print("Accuracy on test set for RandomForest", accuracy_score(predict, y_test))
+
+
+
+############# Random Forest Classifier ###############
+	randomForestClassifier = RandomForestClassifier(n_estimators=50)
+	randomForestClassifier.fit(X_train, y_train)
+	
+	predict = randomForestClassifier.predict(X_test)
+	# print(predict.shape)
+	print("Accuracy on test set for RandomForest", accuracy_score(predict, y_test))
 
 	predict = randomForestClassifier.predict(features)
 	print("Accuracy on entire dataset for RandomForest", accuracy_score(predict, label))
