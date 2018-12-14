@@ -105,7 +105,7 @@ def getAddr(line):
         global_dict[addrStr] = global_counter
         addr = global_counter
         global_counter += 1
-        return addr
+        return addr * 8
 
 memory = Memory(mem_size, block_size)
 cache = Cache(cache_size, mem_size, block_size,
@@ -198,6 +198,7 @@ while (command != "quit"):
                     if line[0] != "<" and line[0] != ">":
                         continue
                     addr = getAddr(line)
+                    print("ADDR: ", addr)
                     if addr == -1:
                         continue
                     # print("ADDR: ", addr)
