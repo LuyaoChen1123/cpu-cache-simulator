@@ -100,7 +100,7 @@ def getAddr(line):
     addrStr = tmp[0]
     addr = 0
     if addrStr in global_dict.keys():
-        return global_dict[addrStr]
+        return global_dict[addrStr] * 8
     else:
         global_dict[addrStr] = global_counter
         addr = global_counter
