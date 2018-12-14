@@ -108,20 +108,23 @@ def main(file):
 	
 	reuse = []
 	result = []
+	j = 0
 	for i in range(len(pred_test)):
 		if pred_test[i] < 0.5:
 			reuse.append(0)
+			j+=1
 		else:
 			reuse.append(1)
 			result.append('< ' + test_addr[i]+'\n')
 
 	with open("pred_nn.txt", "w") as f:
 		for line in train_addr:
-			f.write('<' + line+'\n')
+			f.write('< ' + line+'\n')
 		for line in result:
 			f.write(line)
 
 	# print(reuse)
+	print('The number of addresses bypassed: '+str(j))
 	print('The ratio of correctly predicted reuse: ' + str(sum(reuse == test[:,n-1]) / m))
 	# print('Ratio on train: ' + str(sum(pred_train == train[:,n-1]) / train.shape[0]))
 	# print('Ratio on test: ' + str(sum(pred_test == test[:,n-1]) / test.shape[0]))
