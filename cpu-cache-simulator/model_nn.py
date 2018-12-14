@@ -44,14 +44,14 @@ def train_model(data):
 	print(features.shape)
 
 	# dimensions of the nn
-	n_in, n_h1, n_h2, n_out = n - 1, 300, 300, 1
+	n_in, n_h1, n_h2, n_out = n - 1, 1000, 1000, 1
 	# condition of converge
 	thres = 0.0005
 	model = nn.Sequential(nn.Linear(n_in, n_h1),
 		nn.Tanh(),
-		nn.Linear(n_h1, n_h2),
-		nn.ReLU(),
-		nn.Linear(n_h2, n_out),
+		nn.Linear(n_h1, n_out),
+		# nn.ReLU(),
+		# nn.Linear(n_h2, n_out),
 		nn.Sigmoid()
 		)
 

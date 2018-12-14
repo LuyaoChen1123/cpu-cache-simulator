@@ -182,14 +182,21 @@ while (command != "quit"):
             print("\nHits: {0} | Misses: {1}".format(hits, misses))
             print("Hit/Miss Ratio: {0:.2f}%".format(ratio) + "\n")
 
-        elif command == "ptd" and len(params) == 3:
+        elif command == "ptd":
             # PTD = prepare training data
             # Param 0 = file name
             # Param 1 = look-ahead window
             content = []
-            with open(params[0]) as f:
-                for i in range(int(params[2])):
-                    content.append(f.readline().strip().split(" "))
+            if(len(params) == 2):
+                content = f.readlines()
+                content = [x.strip().split(" ") for x in content]
+
+
+            if(len(params) == 3):
+                with open(params[0]) as f:
+                    for i in range(int(params[2])):
+                        content.append(f.readline().strip().split(" "))
+
             # print("CONTENT: ", len(content))
             # print("EX: ", content)
             for i in range(len(content)):
@@ -198,7 +205,7 @@ while (command != "quit"):
                     if line[0] != "<" and line[0] != ">":
                         continue
                     addr = getAddr(line)
-                    print("ADDR: ", addr)
+                    # print("ADDR: ", addr)
                     if addr == -1:
                         continue
                     # print("ADDR: ", addr)
